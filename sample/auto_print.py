@@ -9,6 +9,7 @@ from phomemo_m03 import Printer
 import time
 import os
 import queue
+import sys
 
 import shutil
 
@@ -71,6 +72,24 @@ if __name__ == "__main__":
 
             #if file added
             if img_num > 0:
+
+                #connect to printer
+                print("connect to printer")
+                retry_num = 0
+                while True:     # Trying open comport multiple time because when Use Bluetooth COM cannot recconect immediatery... (Win10) , (temporary process)
+                    retval = printer.connect_printer()     
+                    if retval == 0:
+                        break
+                    else:
+                        print("[Error] COM connection Error, Retrying...")
+                        retry_num += 1
+
+                    if retry_num >= 10:
+                        print("[Error] Connection Error")
+                        sys.exit(1)
+                            
+
+
                 img_num-=1
                 trg_path = img_queue.get()
                 ext = os.path.splitext(trg_path)[1][1:]
@@ -94,6 +113,8 @@ if __name__ == "__main__":
                 print("")
                 
 
+                printer.disconnect_printer()    # Print is not properly if not Discconect every time. (under investigation)
+                
     except KeyboardInterrupt:   #for abort (CTRL + C)
         observer.stop()
         observer.join()

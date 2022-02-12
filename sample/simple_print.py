@@ -24,5 +24,10 @@ if __name__ == '__main__':
 
     #print
     print("Printing...")
-    printer.print_img(image_file)
+    printer.connect_printer()       #Print to Connector
+    retval = printer.print_img(image_file)   #Print image
+    if retval == Printer._ERR_NO_PRINTER_CONNECTION:
+        print("connect error: check com")
+
+    printer.disconnect_printer()    #Discconect from printer
     print("Finished.")

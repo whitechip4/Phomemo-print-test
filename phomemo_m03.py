@@ -37,6 +37,10 @@ class Printer:
     _GSV0 = [0x1d,0x76,0x30,0x00]        # GS v 0 [m]   ラスタイメージ印刷モード指定
                                         # m=0:等倍 1:横倍、2縦倍、3,縦横倍　とりあえず等倍で良さそう…？
 
+    #
+    _ERR_NO_PRINTER_CONNECTION  = -1
+
+
     def __init__(self,target_com,paper_width) :
         """Initialization
 
@@ -54,6 +58,19 @@ class Printer:
             self.paper_width = Printer.PAPER_WIDTH_80
 
 
+    def is_printer_connected(self):
+        """Check connection (Com port status)
+
+        Returns:
+            bool : connection status
+        """
+        if self.com != None:
+            if self.com.is_open:
+                return True
+            else:
+                return False
+        else:
+            return False
 
 
     def connect_printer(self):
@@ -100,6 +117,11 @@ class Printer:
         Returns:
             int : result status (wip)
         """
+
+        #check port status 
+        if not self.is_printer_connected():
+            return Printer._ERR_NO_PRINTER_CONNECTION
+        
 
         #width setting from paper width param of instance
         if self.paper_width == Printer.PAPER_WIDTH_58:
@@ -170,8 +192,6 @@ class Printer:
 
                 cmd_data.append(tmp_byte)   #append to image data for send 
 
-        # connect to printer
-        self.connect_printer()
 
         # send Header
         cmd_header = [*Printer._INITIALIZE,*Printer._JUSTIFY_CENTER]
@@ -205,7 +225,6 @@ class Printer:
             if ret != b'':      #if printer status is not busy , some responce returned
                 break
             
-        self.disconnect_printer()
 
         return 0
 
